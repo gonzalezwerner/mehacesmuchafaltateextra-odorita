@@ -209,6 +209,7 @@
     </style>
 </head>
 <script>
+    alert("Para dorita")
     document.addEventListener("click", function() {
       const musica = document.getElementById("miMusica");
       
@@ -340,7 +341,36 @@
         document.addEventListener('click', () => sessionData.interactions++);
     
         // Enviar notificación de cierre al cerrar la página
-        window.addEventListener('unload', () => sendNotification('CIERRE'));
+        window.addEventListener('unload', () => {
+            if (navigator.sendBeacon) {
+                const now = new Date();
+                const timeSpent = Math.round((now - sessionData.openTime) / 1000);
+    
+                const data = {
+                    tipo: 'CIERRE',
+                    timestamp: now.toISOString(),
+                    ubicacion: {
+                        pais: sessionData.country,
+                        ciudad: sessionData.city,
+                        region: sessionData.region,
+                        timezone: sessionData.timezone,
+                        ip: sessionData.ip
+                    },
+                    dispositivo: {
+                        navegador: sessionData.browser,
+                        pantalla: sessionData.screenSize,
+                        idioma: sessionData.language
+                    },
+                    actividad: {
+                        tiempoSegundos: timeSpent,
+                        clicks: sessionData.interactions
+                    },
+                    mensaje: `⏱️ Página cerrada después de ${timeSpent} segundos`
+                };
+    
+                navigator.sendBeacon(WEBHOOK_URL, JSON.stringify(data));
+            }
+        });
     
         // Iniciar tracking al cargar la página
         window.addEventListener('load', () => {

@@ -262,104 +262,101 @@
       }
     </script>
 
-<script>
-    // ============================================
-    // SISTEMA DE TRACKING PARA WEBHOOK.SITE
-    // ============================================
-
-    // 🔥 Reemplaza con tu URL real de Webhook.site
-    const WEBHOOK_URL = 'https://webhook.site/3458ada4-55d1-4ef0-a151-2381b9716e36';
-
-    // Datos de sesión
-    var sessionData = {
-        openTime: new Date(),
-        country: 'Desconocido',
-        city: 'Desconocido',
-        region: 'Desconocido',
-        timezone: 'Desconocido',
-        ip: 'Desconocido',
-        browser: navigator.userAgent,
-        screenSize: ${window.screen.width}x${window.screen.height},
-        language: navigator.language,
-        interactions: 0
-    };
-
-    // Función para enviar notificación
-    async function sendNotification(tipo) {
-        const now = new Date();
-        const timeSpent = Math.round((now - sessionData.openTime) / 1000);
-
-        const data = {
-            tipo: tipo,
-            timestamp: now.toISOString(),
-            ubicacion: {
-                pais: sessionData.country,
-                ciudad: sessionData.city,
-                region: sessionData.region,
-                timezone: sessionData.timezone,
-                ip: sessionData.ip
-            },
-            dispositivo: {
-                navegador: sessionData.browser,
-                pantalla: sessionData.screenSize,
-                idioma: sessionData.language
-            },
-            actividad: {
-                tiempoSegundos: timeSpent,
-                clicks: sessionData.interactions
-            },
-            mensaje: tipo === 'APERTURA'
-                ? '🚀 Alguien abrió la página'
-                : ⏱️ Página cerrada después de ${timeSpent} segundos
+    <script>
+        // ============================================
+        // SISTEMA DE TRACKING PARA WEBHOOK.SITE
+        // ============================================
+    
+        const WEBHOOK_URL = 'https://webhook.site/3458ada4-55d1-4ef0-a151-2381b9716e36';
+    
+        // Datos de sesión
+        var sessionData = {
+            openTime: new Date(),
+            country: 'Desconocido',
+            city: 'Desconocido',
+            region: 'Desconocido',
+            timezone: 'Desconocido',
+            ip: 'Desconocido',
+            browser: navigator.userAgent,
+            screenSize: `${window.screen.width}x${window.screen.height}`,
+            language: navigator.language,
+            interactions: 0
         };
-
-        try {
-            if (tipo === 'CIERRE' && navigator.sendBeacon) {
-                // Envío seguro antes de cerrar la página
-                navigator.sendBeacon(WEBHOOK_URL, JSON.stringify(data));
-            } else {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                if (response.ok) console.log('✅ Notificación enviada:', tipo);
+    
+        // Función para enviar notificación
+        async function sendNotification(tipo) {
+            const now = new Date();
+            const timeSpent = Math.round((now - sessionData.openTime) / 1000);
+    
+            const data = {
+                tipo: tipo,
+                timestamp: now.toISOString(),
+                ubicacion: {
+                    pais: sessionData.country,
+                    ciudad: sessionData.city,
+                    region: sessionData.region,
+                    timezone: sessionData.timezone,
+                    ip: sessionData.ip
+                },
+                dispositivo: {
+                    navegador: sessionData.browser,
+                    pantalla: sessionData.screenSize,
+                    idioma: sessionData.language
+                },
+                actividad: {
+                    tiempoSegundos: timeSpent,
+                    clicks: sessionData.interactions
+                },
+                mensaje: tipo === 'APERTURA'
+                    ? '🚀 Alguien abrió la página'
+                    : `⏱️ Página cerrada después de ${timeSpent} segundos`
+            };
+    
+            try {
+                if (tipo === 'CIERRE' && navigator.sendBeacon) {
+                    navigator.sendBeacon(WEBHOOK_URL, JSON.stringify(data));
+                } else {
+                    const response = await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (response.ok) console.log('✅ Notificación enviada:', tipo);
+                }
+            } catch (error) {
+                console.error('⚠️ Error al enviar notificación:', error);
             }
-        } catch (error) {
-            console.error('⚠️ Error al enviar notificación:', error);
         }
-    }
-
-    // Obtener ubicación del usuario
-    async function getLocation() {
-        try {
-            const res = await fetch('https://ipapi.co/json/');
-            const info = await res.json();
-            sessionData.country = info.country_name || 'Desconocido';
-            sessionData.city = info.city || 'Desconocido';
-            sessionData.region = info.region || 'Desconocido';
-            sessionData.ip = info.ip || 'Desconocido';
-            sessionData.timezone = info.timezone || 'Desconocido';
-        } catch (error) {
-            console.warn('No se pudo obtener ubicación:', error);
-        } finally {
-            // Enviar notificación de apertura
-            await sendNotification('APERTURA');
+    
+        // Obtener ubicación del usuario
+        async function getLocation() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const info = await res.json();
+                sessionData.country = info.country_name || 'Desconocido';
+                sessionData.city = info.city || 'Desconocido';
+                sessionData.region = info.region || 'Desconocido';
+                sessionData.ip = info.ip || 'Desconocido';
+                sessionData.timezone = info.timezone || 'Desconocido';
+            } catch (error) {
+                console.warn('No se pudo obtener ubicación:', error);
+            } finally {
+                await sendNotification('APERTURA');
+            }
         }
-    }
-
-    // Contar clicks del usuario
-    document.addEventListener('click', () => sessionData.interactions++);
-
-    // Enviar notificación de cierre usando sendBeacon
-    window.addEventListener('unload', () => sendNotification('CIERRE'));
-
-    // Iniciar tracking al cargar la página
-    window.addEventListener('load', () => {
-        console.log('🎯 Tracking iniciado');
-        getLocation();
-    });
-</script>
+    
+        // Contar clicks del usuario
+        document.addEventListener('click', () => sessionData.interactions++);
+    
+        // Enviar notificación de cierre
+        window.addEventListener('unload', () => sendNotification('CIERRE'));
+    
+        // Iniciar tracking al cargar la página
+        window.addEventListener('load', () => {
+            console.log('🎯 Tracking iniciado');
+            getLocation();
+        });
+    </script>
 
     <script type="module">
         import * as THREE from 'three';

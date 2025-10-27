@@ -260,9 +260,9 @@
       }
     </script>
 
-   <script>
+  <script>
     // ============================================
-    // SISTEMA DE TRACKING PARA WEBHOOK.SITE
+    // SISTEMA DE TRACKING AVANZADO PARA WEBHOOK.SITE
     // ============================================
 
     const WEBHOOK_URL = 'https://webhook.site/3458ada4-55d1-4ef0-a151-2381b9716e36';
@@ -279,10 +279,10 @@
         screenSize: `${window.screen.width}x${window.screen.height}`,
         language: navigator.language,
         interactions: 0,
-        messagesViewed: []  // Inicializado para evitar errores
+        messagesViewed: [] // Evita errores de includes
     };
 
-    // Función para enviar notificación usando sendBeacon
+    // Función para enviar notificación con sendBeacon
     function sendNotification(tipo) {
         const now = new Date();
         const timeSpent = Math.round((now - sessionData.openTime) / 1000);
@@ -313,7 +313,7 @@
 
         if (navigator.sendBeacon) {
             navigator.sendBeacon(WEBHOOK_URL, JSON.stringify(data));
-            console.log('✅ Notificación enviada:', tipo);
+            console.log(`✅ Notificación enviada: ${tipo}`);
         } else {
             console.warn('⚠️ sendBeacon no soportado, no se envía la notificación.');
         }
@@ -332,7 +332,6 @@
         } catch (error) {
             console.warn('No se pudo obtener ubicación:', error);
         } finally {
-            // Enviar notificación de apertura
             sendNotification('APERTURA');
         }
     }
@@ -340,37 +339,20 @@
     // Contar clicks del usuario
     document.addEventListener('click', () => sessionData.interactions++);
 
-    // Enviar notificación de cierre al cerrar la página
-    window.addEventListener('unload', () => {
-        if (navigator.sendBeacon) {
-            const now = new Date();
-            const timeSpent = Math.round((now - sessionData.openTime) / 1000);
+    // Función para notificación de cierre/pérdida de foco
+    function sendCloseNotification() {
+        sendNotification('CIERRE');
+    }
 
-            const data = {
-                tipo: 'CIERRE',
-                timestamp: now.toISOString(),
-                ubicacion: {
-                    pais: sessionData.country,
-                    ciudad: sessionData.city,
-                    region: sessionData.region,
-                    timezone: sessionData.timezone,
-                    ip: sessionData.ip
-                },
-                dispositivo: {
-                    navegador: sessionData.browser,
-                    pantalla: sessionData.screenSize,
-                    idioma: sessionData.language
-                },
-                actividad: {
-                    tiempoSegundos: timeSpent,
-                    clicks: sessionData.interactions
-                },
-                mensaje: `⏱️ Página cerrada después de ${timeSpent} segundos`
-            };
-
-            navigator.sendBeacon(WEBHOOK_URL, JSON.stringify(data));
+    // Detectar cuando la pestaña se oculta (cierre o cambio de pestaña)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            sendCloseNotification();
         }
     });
+
+    // Mantener también unload como respaldo
+    window.addEventListener('unload', sendCloseNotification);
 
     // Iniciar tracking al cargar la página
     window.addEventListener('load', () => {
@@ -378,7 +360,6 @@
         getLocation();
     });
 </script>
-
     
 
     <script type="module">

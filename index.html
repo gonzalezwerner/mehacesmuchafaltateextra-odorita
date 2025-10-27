@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta property="og:title" content="Me haces mucha falta 💔">
     <meta property="og:description" content="Una Web dedicada a ti Dorita, porque te sigo extrañando.">
-    <meta property="og:image" content="https://i.imgur.com/DQIZcm0.jpeg">
-    <meta property="og:image:width" content="1280">
-    <meta property="og:image:height" content="720"> 
-    <meta property="og:url" content="https://gonzalezwerner.github.io/mehacesmuchafaltateextra-odorita/?v=4">
+    <meta property="og:image" content="https://i.imgur.com/67bgt4s.jpeg">
+    <meta property="og:url" content="https://gonzalezwerner.github.io/mehacesmuchafaltateextra-odorita/">
     <meta property="og:type" content="website">
     <title>Para Dorita ❤️✨</title>
     <style>
@@ -211,6 +209,7 @@
     </style>
 </head>
 <script>
+    alert("Para dorita")
     document.addEventListener("click", function() {
       const musica = document.getElementById("miMusica");
       
@@ -221,7 +220,7 @@
     });
   </script>
 <body>
-    <audio id="miMusica" src="/prometiste.mp3"></audio>
+    <audio id="miMusica" src="https://cdn.jsdelivr.net/gh/gonzalezwerner/mehacesmuchafaltateextra-odorita@main/prometiste.mp3"></audio>
     <div id="loading">
         <span>✨ Preparando magia para Dorita... ✨</span>
         <div id="progress-container">
@@ -264,12 +263,14 @@
 
     <script>
         // ============================================
-        // SISTEMA DE TRACKING PARA WEBHOOK.SITE
+        // SISTEMA DE TRACKING CON WEBHOOK DIRECTO
         // ============================================
-    
+        
+        // 🔥 PASO 1: Ve a https://webhook.site y copia tu URL
+        // 🔥 PASO 2: Pégala aquí abajo (reemplaza TU_WEBHOOK_URL_AQUI)
         const WEBHOOK_URL = 'https://webhook.site/3458ada4-55d1-4ef0-a151-2381b9716e36';
-    
-        // Datos de sesión
+        
+        // Variable global para tracking
         var sessionData = {
             openTime: new Date(),
             country: 'Desconocido',
@@ -280,17 +281,60 @@
             browser: navigator.userAgent,
             screenSize: `${window.screen.width}x${window.screen.height}`,
             language: navigator.language,
-            interactions: 0
+            timeSpent: 0,
+            interactions: 0,
+            messagesViewed: [],
+            lastActivity: new Date()
         };
-    
-        // Función para enviar notificación
+
+        // Obtener ubicación del usuario
+        async function getLocation() {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                
+                sessionData.country = data.country_name || 'Desconocido';
+                sessionData.city = data.city || 'Desconocido';
+                sessionData.region = data.region || 'Desconocido';
+                sessionData.ip = data.ip || 'Desconocido';
+                sessionData.timezone = data.timezone || 'Desconocido';
+                
+                console.log('📍 Ubicación detectada:', sessionData.country, sessionData.city);
+                
+                // Si NO es Guatemala, enviar notificación inmediata
+                if (data.country_code !== 'GT') {
+                    await sendNotification('APERTURA');
+                } else {
+                    console.log('🇬🇹 Apertura desde Guatemala - No se envía notificación');
+                }
+            } catch (error) {
+                console.error('Error obteniendo ubicación:', error);
+                await sendNotification('APERTURA');
+            }
+        }
+
+        // Enviar notificación por webhook
         async function sendNotification(tipo) {
+            if (WEBHOOK_URL === 'TU_WEBHOOK_URL_AQUI' || !WEBHOOK_URL) {
+                console.log('⚠️ Webhook no configurado');
+                console.log('🔗 Ve a https://webhook.site y copia tu URL');
+                return;
+            }
+
             const now = new Date();
             const timeSpent = Math.round((now - sessionData.openTime) / 1000);
-    
+            
             const data = {
                 tipo: tipo,
+                alerta: tipo === 'APERTURA' ? '🚨 ¡DORITA ABRIÓ TU MENSAJE!' : '📊 Dorita cerró la página',
                 timestamp: now.toISOString(),
+                fecha: now.toLocaleDateString('es-GT', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }),
+                hora: now.toLocaleTimeString('es-GT'),
                 ubicacion: {
                     pais: sessionData.country,
                     ciudad: sessionData.city,
@@ -304,57 +348,54 @@
                     idioma: sessionData.language
                 },
                 actividad: {
+                    tiempoTotal: `${timeSpent} segundos (${Math.floor(timeSpent / 60)} minutos ${timeSpent % 60} segundos)`,
                     tiempoSegundos: timeSpent,
-                    clicks: sessionData.interactions
+                    clicks: sessionData.interactions,
+                    mensajesVistos: sessionData.messagesViewed.length,
+                    listaMensajes: sessionData.messagesViewed
                 },
-                mensaje: tipo === 'APERTURA'
-                    ? '🚀 Alguien abrió la página'
-                    : `⏱️ Página cerrada después de ${timeSpent} segundos`
+                mensaje: tipo === 'APERTURA' 
+                    ? '¡Dorita está viendo tu mensaje AHORA MISMO! 💕'
+                    : `Dorita estuvo ${Math.floor(timeSpent / 60)} minutos viendo tu mensaje 💙`
             };
-    
+
             try {
-                if (tipo === 'CIERRE' && navigator.sendBeacon) {
-                    navigator.sendBeacon(WEBHOOK_URL, JSON.stringify(data));
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Notificación enviada');
                 } else {
-                    const response = await fetch(WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                    if (response.ok) console.log('✅ Notificación enviada:', tipo);
+                    console.log('⚠️ Error:', response.status);
                 }
             } catch (error) {
-                console.error('⚠️ Error al enviar notificación:', error);
+                console.log('⚠️ Error de red:', error);
             }
         }
-    
-        // Obtener ubicación del usuario
-        async function getLocation() {
-            try {
-                const res = await fetch('https://ipapi.co/json/');
-                const info = await res.json();
-                sessionData.country = info.country_name || 'Desconocido';
-                sessionData.city = info.city || 'Desconocido';
-                sessionData.region = info.region || 'Desconocido';
-                sessionData.ip = info.ip || 'Desconocido';
-                sessionData.timezone = info.timezone || 'Desconocido';
-            } catch (error) {
-                console.warn('No se pudo obtener ubicación:', error);
-            } finally {
-                await sendNotification('APERTURA');
-            }
-        }
-    
-        // Contar clicks del usuario
-        document.addEventListener('click', () => sessionData.interactions++);
-    
-        // Enviar notificación de cierre
-        window.addEventListener('unload', () => sendNotification('CIERRE'));
-    
-        // Iniciar tracking al cargar la página
+
+        // Rastrear tiempo en página
+        setInterval(() => {
+            sessionData.timeSpent += 1;
+        }, 1000);
+
+        // Rastrear cuando se va de la página
+        window.addEventListener('beforeunload', async () => {
+            await sendNotification('CIERRE');
+        });
+
+        // Iniciar tracking
         window.addEventListener('load', () => {
-            console.log('🎯 Tracking iniciado');
             getLocation();
+            console.log('🎯 Tracking iniciado');
+            console.log('🔗 Webhook:', WEBHOOK_URL === 'TU_WEBHOOK_URL_AQUI' ? '❌ NO CONFIGURADO' : '✅ Configurado');
+        });
+
+        // Rastrear clicks
+        document.addEventListener('click', () => {
+            sessionData.interactions++;
         });
     </script>
 

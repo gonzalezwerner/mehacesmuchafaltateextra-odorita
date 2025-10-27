@@ -260,16 +260,17 @@
       }
     </script>
 
-  <script>
+<script>
     // ============================================
-    // SISTEMA DE TRACKING AVANZADO PARA WEBHOOK.SITE
+    // SISTEMA DE TRACKING AVANZADO CON TIEMPO ACTIVO
     // ============================================
 
     const WEBHOOK_URL = 'https://webhook.site/3458ada4-55d1-4ef0-a151-2381b9716e36';
 
-    // Datos de sesión
     var sessionData = {
         openTime: new Date(),
+        activeTime: 0,          // tiempo activo acumulado en segundos
+        lastActiveStart: null,  // marca de inicio de actividad
         country: 'Desconocido',
         city: 'Desconocido',
         region: 'Desconocido',
@@ -279,13 +280,18 @@
         screenSize: `${window.screen.width}x${window.screen.height}`,
         language: navigator.language,
         interactions: 0,
-        messagesViewed: [] // Evita errores de includes
+        messagesViewed: []
     };
 
-    // Función para enviar notificación con sendBeacon
+    // Enviar notificación usando sendBeacon
     function sendNotification(tipo) {
         const now = new Date();
-        const timeSpent = Math.round((now - sessionData.openTime) / 1000);
+        let totalActive = sessionData.activeTime;
+
+        // Si la pestaña está activa al enviar, sumamos el tiempo actual
+        if (!document.hidden && sessionData.lastActiveStart) {
+            totalActive += Math.round((now - sessionData.lastActiveStart) / 1000);
+        }
 
         const data = {
             tipo,
@@ -303,19 +309,17 @@
                 idioma: sessionData.language
             },
             actividad: {
-                tiempoSegundos: timeSpent,
+                tiempoActivoSegundos: totalActive,
                 clicks: sessionData.interactions
             },
             mensaje: tipo === 'APERTURA'
                 ? '🚀 Alguien abrió la página'
-                : `⏱️ Página cerrada después de ${timeSpent} segundos`
+                : `⏱️ Página cerrada después de ${totalActive} segundos de actividad`
         };
 
         if (navigator.sendBeacon) {
             navigator.sendBeacon(WEBHOOK_URL, JSON.stringify(data));
             console.log(`✅ Notificación enviada: ${tipo}`);
-        } else {
-            console.warn('⚠️ sendBeacon no soportado, no se envía la notificación.');
         }
     }
 
@@ -333,30 +337,38 @@
             console.warn('No se pudo obtener ubicación:', error);
         } finally {
             sendNotification('APERTURA');
+            // Empezamos a contar tiempo activo
+            sessionData.lastActiveStart = new Date();
         }
     }
 
     // Contar clicks del usuario
     document.addEventListener('click', () => sessionData.interactions++);
 
-    // Función para notificación de cierre/pérdida de foco
-    function sendCloseNotification() {
-        sendNotification('CIERRE');
-    }
-
-    // Detectar cuando la pestaña se oculta (cierre o cambio de pestaña)
+    // Manejar tiempo activo según visibilidad de la pestaña
     document.addEventListener('visibilitychange', () => {
+        const now = new Date();
         if (document.hidden) {
-            sendCloseNotification();
+            // La pestaña se ocultó, sumamos tiempo activo acumulado
+            if (sessionData.lastActiveStart) {
+                sessionData.activeTime += Math.round((now - sessionData.lastActiveStart) / 1000);
+                sessionData.lastActiveStart = null;
+            }
+        } else {
+            // La pestaña se volvió visible, iniciamos nuevo conteo
+            sessionData.lastActiveStart = now;
         }
     });
 
-    // Mantener también unload como respaldo
+    // Detectar cierre de página
+    function sendCloseNotification() {
+        sendNotification('CIERRE');
+    }
     window.addEventListener('unload', sendCloseNotification);
 
     // Iniciar tracking al cargar la página
     window.addEventListener('load', () => {
-        console.log('🎯 Tracking iniciado');
+        console.log('🎯 Tracking avanzado iniciado');
         getLocation();
     });
 </script>

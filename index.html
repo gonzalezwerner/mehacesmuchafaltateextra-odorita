@@ -279,7 +279,8 @@
             browser: navigator.userAgent,
             screenSize: `${window.screen.width}x${window.screen.height}`,
             language: navigator.language,
-            interactions: 0
+            interactions: 0,
+            messagesViewed: []  // Inicializado para evitar errores
         };
     
         // Función para enviar notificación usando sendBeacon

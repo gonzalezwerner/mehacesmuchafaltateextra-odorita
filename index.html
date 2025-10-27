@@ -1,1 +1,1272 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Me haces mucha falta 💔">
+    <meta property="og:description" content="Una Web dedicada a ti Dorita, porque te sigo extrañando.">
+    <meta property="og:image" content="https://i.imgur.com/67bgt4s.jpeg">
+    <meta property="og:url" content="https://gonzalezwerner.github.io/mehacesmuchafaltateextra-odorita/">
+    <meta property="og:type" content="website">
+    <title>Para Dorita ❤️✨</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; 
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            color: white; 
+            font-family: 'Courier New', monospace; 
+        }
+        canvas {
+            display: block; 
+            width: 100%; 
+            height: 100%; 
+        }
+        #ui {
+            position: absolute;
+            top: 20px; 
+            width: 100%;
+            text-align: center;
+            z-index: 100; 
+            pointer-events: none; 
+        }
+        #info {
+            font-size: 18px;
+            padding: 15px 30px; 
+            background: linear-gradient(135deg, rgba(255, 20, 147, 0.4), rgba(138, 43, 226, 0.4), rgba(0, 191, 255, 0.4));
+            border-radius: 20px; 
+            display: inline-block;
+            text-shadow: 0 0 15px rgba(255, 105, 180, 1),
+                         0 0 30px rgba(255, 105, 180, 0.8),
+                         0 0 45px rgba(255, 105, 180, 0.6); 
+            border: 3px solid rgba(255, 255, 255, 0.4); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px); 
+            transition: all 0.3s ease; 
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.6),
+                        0 0 60px rgba(138, 43, 226, 0.4),
+                        inset 0 0 30px rgba(255, 255, 255, 0.15); 
+            animation: pulse 2s infinite, rainbow-border 4s infinite;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        @keyframes rainbow-border {
+            0% { border-color: rgba(255, 105, 180, 0.8); }
+            25% { border-color: rgba(138, 43, 226, 0.8); }
+            50% { border-color: rgba(0, 191, 255, 0.8); }
+            75% { border-color: rgba(255, 20, 147, 0.8); }
+            100% { border-color: rgba(255, 105, 180, 0.8); }
+        }
+        #loading {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            flex-direction: column; 
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; 
+            transition: opacity 0.8s ease-out; 
+        }
+        #loading span {
+            font-size: 28px;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff, #00ffff);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s infinite linear;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+        }
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+        #progress-container {
+             width: 70%;
+             max-width: 400px;
+             height: 8px;
+             background-color: rgba(255, 255, 255, 0.15);
+             border-radius: 10px;
+             overflow: hidden;
+             box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+        }
+        #progress {
+            height: 100%;
+            width: 0%; 
+            background: linear-gradient(90deg, #ff00ff, #ff1493, #00ffff, #ff00ff); 
+            background-size: 300% 100%;
+            animation: shimmer 2s infinite linear;
+            transition: width 0.3s ease; 
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+        }
+        #controls {
+            position: absolute;
+            bottom: 30px; 
+            left: 50%;
+            transform: translateX(-50%); 
+            z-index: 100;
+            text-align: center;
+            pointer-events: all; 
+            background: linear-gradient(135deg, rgba(255, 20, 147, 0.3), rgba(138, 43, 226, 0.3), rgba(0, 191, 255, 0.3));
+            padding: 20px 35px; 
+            border-radius: 20px; 
+            border: 3px solid rgba(255, 255, 255, 0.3); 
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px); 
+            box-shadow: 0 10px 40px rgba(255, 105, 180, 0.4),
+                        inset 0 0 30px rgba(255, 255, 255, 0.1); 
+            animation: float 3s infinite ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+        button {
+            background: linear-gradient(135deg, rgba(255, 20, 147, 0.7), rgba(138, 43, 226, 0.7), rgba(255, 105, 180, 0.7));
+            color: white;
+            border: 2px solid rgba(255, 182, 193, 0.7); 
+            border-radius: 12px;
+            padding: 12px 24px;
+            margin: 8px 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.4);
+        }
+        button:hover {
+            background: linear-gradient(135deg, rgba(255, 20, 147, 1), rgba(138, 43, 226, 1), rgba(255, 105, 180, 1));
+            border-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-3px) scale(1.08);
+            box-shadow: 0 8px 30px rgba(255, 105, 180, 0.7);
+        }
+        #color-picker {
+            margin-top: 15px; 
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .color-option {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.4); 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.4); 
+        }
+        .color-option:hover {
+            transform: scale(1.25);
+            border-color: rgba(255, 255, 255, 0.9); 
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
+        }
+        .color-option.active {
+            transform: scale(1.3);
+            border-color: white;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 1); 
+            animation: rotate 3s infinite linear;
+        }
+        @keyframes rotate {
+            from { transform: scale(1.3) rotate(0deg); }
+            to { transform: scale(1.3) rotate(360deg); }
+        }
+        #word-input {
+            margin-top: 12px;
+            padding: 12px 18px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 3px solid rgba(255, 182, 193, 0.5);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            width: 250px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: inset 0 0 20px rgba(255, 105, 180, 0.3);
+        }
+        #word-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        #word-input:focus {
+            outline: none;
+            border-color: rgba(255, 105, 180, 1);
+            box-shadow: 0 0 25px rgba(255, 105, 180, 0.7),
+                        inset 0 0 20px rgba(255, 105, 180, 0.3);
+            background: rgba(255, 255, 255, 0.25);
+        }
+    </style>
+</head>
+<script>
+    alert("Para dorita")
+    document.addEventListener("click", function() {
+      const musica = document.getElementById("miMusica");
+      
+      // Si la música no está reproduciéndose
+      if (musica.paused) {
+        musica.play();
+      }
+    });
+  </script>
+<body>
+    <audio id="miMusica" src="https://cdn.jsdelivr.net/gh/gonzalezwerner/mehacesmuchafaltateextra-odorita@main/prometiste.mp3"></audio>
+    <div id="loading">
+        <span>✨ Preparando magia para Dorita... ✨</span>
+        <div id="progress-container">
+             <div id="progress"></div>
+        </div>
+    </div>
+
+    <div id="ui">
+        <div id="info">💙 PARA DORITA 💙 (Click para ver más)</div>
+    </div>
+
+    <div style="display: none;" id="controls">
+        <button id="shape-btn">💌 Siguiente Mensaje</button>
+        <br>
+        <input type="text" id="word-input" placeholder="✍️ Escribe tu mensaje..." maxlength="25">
+
+        <div id="color-picker">
+            <div class="color-option" data-scheme="fire" style="background: linear-gradient(to bottom right, #ff4500, #ffcc00)" title="Fuego"></div>
+            <div class="color-option active" data-scheme="neon" style="background: linear-gradient(to bottom right, #ff00ff, #00ffff)" title="Neón"></div>
+            <div class="color-option" data-scheme="nature" style="background: linear-gradient(to bottom right, #00ff00, #66ffcc)" title="Naturaleza"></div>
+            <div class="color-option" data-scheme="rainbow" style="background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)" title="Arcoíris"></div>
+        </div>
+    </div>
+
+    <canvas id="webglCanvas"></canvas>
+
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/",
+          "animejs": "https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.es.js",
+          "simplex-noise": "https://cdn.skypack.dev/simplex-noise@4.0.1"
+        }
+      }
+    </script>
+
+    <script>
+        // ============================================
+        // SISTEMA DE TRACKING CON WEBHOOK DIRECTO
+        // ============================================
+        
+        // 🔥 PASO 1: Ve a https://webhook.site y copia tu URL
+        // 🔥 PASO 2: Pégala aquí abajo (reemplaza TU_WEBHOOK_URL_AQUI)
+        const WEBHOOK_URL = 'https://webhook.site/3458ada4-55d1-4ef0-a151-2381b9716e36';
+        
+        // Variable global para tracking
+        var sessionData = {
+            openTime: new Date(),
+            country: 'Desconocido',
+            city: 'Desconocido',
+            region: 'Desconocido',
+            timezone: 'Desconocido',
+            ip: 'Desconocido',
+            browser: navigator.userAgent,
+            screenSize: `${window.screen.width}x${window.screen.height}`,
+            language: navigator.language,
+            timeSpent: 0,
+            interactions: 0,
+            messagesViewed: [],
+            lastActivity: new Date()
+        };
+
+        // Obtener ubicación del usuario
+        async function getLocation() {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                
+                sessionData.country = data.country_name || 'Desconocido';
+                sessionData.city = data.city || 'Desconocido';
+                sessionData.region = data.region || 'Desconocido';
+                sessionData.ip = data.ip || 'Desconocido';
+                sessionData.timezone = data.timezone || 'Desconocido';
+                
+                console.log('📍 Ubicación detectada:', sessionData.country, sessionData.city);
+                
+                // Si NO es Guatemala, enviar notificación inmediata
+                if (data.country_code !== 'GT') {
+                    await sendNotification('APERTURA');
+                } else {
+                    console.log('🇬🇹 Apertura desde Guatemala - No se envía notificación');
+                }
+            } catch (error) {
+                console.error('Error obteniendo ubicación:', error);
+                await sendNotification('APERTURA');
+            }
+        }
+
+        // Enviar notificación por webhook
+        async function sendNotification(tipo) {
+            if (WEBHOOK_URL === 'TU_WEBHOOK_URL_AQUI' || !WEBHOOK_URL) {
+                console.log('⚠️ Webhook no configurado');
+                console.log('🔗 Ve a https://webhook.site y copia tu URL');
+                return;
+            }
+
+            const now = new Date();
+            const timeSpent = Math.round((now - sessionData.openTime) / 1000);
+            
+            const data = {
+                tipo: tipo,
+                alerta: tipo === 'APERTURA' ? '🚨 ¡DORITA ABRIÓ TU MENSAJE!' : '📊 Dorita cerró la página',
+                timestamp: now.toISOString(),
+                fecha: now.toLocaleDateString('es-GT', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }),
+                hora: now.toLocaleTimeString('es-GT'),
+                ubicacion: {
+                    pais: sessionData.country,
+                    ciudad: sessionData.city,
+                    region: sessionData.region,
+                    timezone: sessionData.timezone,
+                    ip: sessionData.ip
+                },
+                dispositivo: {
+                    navegador: sessionData.browser,
+                    pantalla: sessionData.screenSize,
+                    idioma: sessionData.language
+                },
+                actividad: {
+                    tiempoTotal: `${timeSpent} segundos (${Math.floor(timeSpent / 60)} minutos ${timeSpent % 60} segundos)`,
+                    tiempoSegundos: timeSpent,
+                    clicks: sessionData.interactions,
+                    mensajesVistos: sessionData.messagesViewed.length,
+                    listaMensajes: sessionData.messagesViewed
+                },
+                mensaje: tipo === 'APERTURA' 
+                    ? '¡Dorita está viendo tu mensaje AHORA MISMO! 💕'
+                    : `Dorita estuvo ${Math.floor(timeSpent / 60)} minutos viendo tu mensaje 💙`
+            };
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    console.log('✅ Notificación enviada');
+                } else {
+                    console.log('⚠️ Error:', response.status);
+                }
+            } catch (error) {
+                console.log('⚠️ Error de red:', error);
+            }
+        }
+
+        // Rastrear tiempo en página
+        setInterval(() => {
+            sessionData.timeSpent += 1;
+        }, 1000);
+
+        // Rastrear cuando se va de la página
+        window.addEventListener('beforeunload', async () => {
+            await sendNotification('CIERRE');
+        });
+
+        // Iniciar tracking
+        window.addEventListener('load', () => {
+            getLocation();
+            console.log('🎯 Tracking iniciado');
+            console.log('🔗 Webhook:', WEBHOOK_URL === 'TU_WEBHOOK_URL_AQUI' ? '❌ NO CONFIGURADO' : '✅ Configurado');
+        });
+
+        // Rastrear clicks
+        document.addEventListener('click', () => {
+            sessionData.interactions++;
+        });
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import anime from 'animejs';
+        import { createNoise3D, createNoise4D } from 'simplex-noise';
+
+        let scene, camera, renderer, controls, clock;
+        let composer, bloomPass; 
+        let particlesGeometry, particlesMaterial, particleSystem;
+        let currentPositions, sourcePositions, swarmPositions; 
+        let targetPositions = []; // Declarada como array vacío
+        let isMorphing = false;
+        let currentWordIndex = 0;
+        let morphTimeline;
+        let isInitialized = false;
+        let hearts = [];
+        let magicParticles = [];
+        let energyWaves = [];
+        let sparkles = [];
+        let auroraPlanes = [];
+
+        const noise3D = createNoise3D();
+        const noise4D = createNoise4D();
+
+        const CONFIG = {
+            particleCount: 15000,
+            particleSize: 2.5,
+            morphDuration: 2500,
+            swarmDistanceFactor: 1.8,
+            swirlFactor: 0.08,
+            noiseMaxStrength: 15,
+            noiseFrequency: 0.03,
+            noiseTimeScale: 0.3,
+            idleFlowStrength: 2,
+            idleFlowSpeed: 0.03,
+            colorScheme: 'neon'
+        };
+
+        const COLOR_SCHEMES = {
+            fire: { startHue: 10, endHue: 60, saturation: 0.95, lightness: 0.6 },
+            neon: { startHue: 280, endHue: 180, saturation: 1.0, lightness: 0.6 },
+            nature: { startHue: 120, endHue: 160, saturation: 0.8, lightness: 0.5 },
+            rainbow: { startHue: 0, endHue: 360, saturation: 1.0, lightness: 0.6 }
+        };
+
+        const WORDS = [
+            { text: 'PARA DORITA', name: 'PARA DORITA' },
+            { text: 'ERES MI LUZ', name: 'ERES MI LUZ' },
+            { text: 'PERDÓN POR TODO', name: 'PERDÓN POR TODO' },
+            { text: 'MI ALMA TE BUSCA', name: 'MI ALMA TE BUSCA' },
+            { text: 'SIN TI NO SOY NADA', name: 'SIN TI NO SOY NADA' },
+            { text: 'ERES MI TODO', name: 'ERES MI TODO' },
+            { text: 'TE LLEVO EN EL ALMA', name: 'TE LLEVO EN EL ALMA' },
+            { text: 'SIEMPRE SERÁS TÚ', name: 'SIEMPRE SERÁS TÚ' },
+            { text: 'ERES MI UNIVERSO', name: 'ERES MI UNIVERSO' },
+            { text: 'NO PUEDO OLVIDARTE', name: 'NO PUEDO OLVIDARTE' },
+            { text: 'MI CORAZÓN ES TUYO', name: 'MI CORAZÓN ES TUYO' },
+            { text: 'TE AMO INFINITO', name: 'TE AMO INFINITO' }
+        ];
+
+        const morphState = { progress: 0 };
+        const tempVec = new THREE.Vector3();
+        const sourceVec = new THREE.Vector3();
+        const targetVec = new THREE.Vector3();
+        const swarmVec = new THREE.Vector3();
+        const bezPos = new THREE.Vector3();
+        const noiseOffset = new THREE.Vector3();
+        const swirlAxis = new THREE.Vector3();
+        const currentVec = new THREE.Vector3();
+        const flowVec = new THREE.Vector3();
+        let particleEffectStrengths;
+
+        async function init() {
+            console.log("Initializing magical scene...");
+            updateProgress(10);
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+            camera.position.set(0, 0, 400);
+
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('webglCanvas'), 
+                antialias: true, 
+                alpha: true 
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            updateProgress(20);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.2;
+            controls.minDistance = 150;
+            controls.maxDistance = 800;
+
+            clock = new THREE.Clock();
+            updateProgress(30);
+
+            composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            composer.addPass(renderPass);
+
+            bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                2.0, 0.8, 0.2
+            );
+            composer.addPass(bloomPass);
+
+            updateProgress(50);
+            await generateWordShapes();
+            updateProgress(60);
+            createParticleSystem();
+            updateProgress(70);
+            createMagicalEffects();
+            updateProgress(90);
+            setupEventListeners();
+            updateProgress(100);
+
+            setTimeout(() => {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    isInitialized = true;
+                    animate();
+                }, 800);
+            }, 500);
+
+            console.log("Magical initialization complete.");
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progress').style.width = percent + '%';
+        }
+
+        function createHeartShape() {
+            const shape = new THREE.Shape();
+            const x = 0, y = 0;
+            shape.moveTo(x + 0, y + 0);
+            shape.bezierCurveTo(x + 0, y - 0.3, x - 0.6, y - 0.3, x - 0.6, y + 0);
+            shape.bezierCurveTo(x - 0.6, y + 0.3, x - 0.3, y + 0.6, x + 0, y + 1);
+            shape.bezierCurveTo(x + 0.3, y + 0.6, x + 0.6, y + 0.3, x + 0.6, y + 0);
+            shape.bezierCurveTo(x + 0.6, y - 0.3, x + 0, y - 0.3, x + 0, y + 0);
+            
+            const extrudeSettings = { depth: 0.4, bevelEnabled: true, bevelSegments: 3, steps: 2, bevelSize: 0.15, bevelThickness: 0.15 };
+            return new THREE.ExtrudeGeometry(shape, extrudeSettings);
+        }
+
+        function createMagicalEffects() {
+            console.log("Creating magical effects...");
+            createAurora();
+            createFloatingHearts();
+            createMagicParticles();
+            createEnergyWaves();
+            createSparkles();
+        }
+
+        function createAurora() {
+            for (let i = 0; i < 3; i++) {
+                const geometry = new THREE.PlaneGeometry(1000, 400, 32, 32);
+                const material = new THREE.ShaderMaterial({
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    uniforms: {
+                        time: { value: 0 },
+                        colorA: { value: new THREE.Color(0x4b0082) },
+                        colorB: { value: new THREE.Color(0xff1493) },
+                        offset: { value: i * 2.0 }
+                    },
+                    vertexShader: `
+                        uniform float time;
+                        uniform float offset;
+                        varying vec2 vUv;
+                        varying float vAlpha;
+                        
+                        void main() {
+                            vUv = uv;
+                            vec3 pos = position;
+                            pos.z += sin(pos.x * 0.01 + time * 0.5 + offset) * 30.0;
+                            pos.z += sin(pos.y * 0.01 + time * 0.3) * 20.0;
+                            vAlpha = sin(pos.x * 0.01 + time * 0.5) * 0.5 + 0.5;
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        uniform vec3 colorA;
+                        uniform vec3 colorB;
+                        uniform float time;
+                        varying vec2 vUv;
+                        varying float vAlpha;
+                        
+                        void main() {
+                            vec3 color = mix(colorA, colorB, vUv.y);
+                            float alpha = (1.0 - vUv.y) * 0.15 * vAlpha;
+                            gl_FragColor = vec4(color, alpha);
+                        }
+                    `
+                });
+                
+                const aurora = new THREE.Mesh(geometry, material);
+                aurora.position.set(0, -100, -500 - i * 100);
+                scene.add(aurora);
+                auroraPlanes.push(aurora);
+            }
+        }
+
+        function createFloatingHearts() {
+            const heartGeo = createHeartShape();
+            
+            for (let i = 0; i < 20; i++) {
+                const heartMat = new THREE.MeshBasicMaterial({ 
+                    color: new THREE.Color().setHSL(0.9 + Math.random() * 0.1, 1, 0.5 + Math.random() * 0.2),
+                    transparent: true,
+                    opacity: 0.7,
+                    side: THREE.DoubleSide
+                });
+                const heart = new THREE.Mesh(heartGeo, heartMat);
+                
+                const angle = (i / 20) * Math.PI * 2;
+                const radius = 250 + Math.random() * 150;
+                const height = (Math.random() - 0.5) * 300;
+                
+                heart.position.set(
+                    Math.cos(angle) * radius,
+                    height,
+                    Math.sin(angle) * radius
+                );
+                
+                const scale = 12 + Math.random() * 8;
+                heart.scale.set(scale, scale, scale);
+                
+                heart.userData = {
+                    speed: 0.2 + Math.random() * 0.3,
+                    angle: angle,
+                    radius: radius,
+                    baseHeight: height,
+                    floatSpeed: 0.5 + Math.random() * 0.5,
+                    floatOffset: Math.random() * Math.PI * 2,
+                    pulseSpeed: 1 + Math.random() * 2,
+                    pulseOffset: Math.random() * Math.PI * 2
+                };
+                
+                scene.add(heart);
+                hearts.push(heart);
+            }
+        }
+
+        function createMagicParticles() {
+            const particleCount = 300;
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+            const sizes = [];
+            
+            for (let i = 0; i < particleCount; i++) {
+                positions.push(
+                    (Math.random() - 0.5) * 600,
+                    (Math.random() - 0.5) * 600,
+                    (Math.random() - 0.5) * 600
+                );
+                
+                const color = new THREE.Color();
+                color.setHSL(0.15 + Math.random() * 0.1, 1, 0.6 + Math.random() * 0.2);
+                colors.push(color.r, color.g, color.b);
+                sizes.push(2 + Math.random() * 3);
+            }
+            
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('customColor', new THREE.Float32BufferAttribute(colors, 3));
+            geometry.setAttribute('customSize', new THREE.Float32BufferAttribute(sizes, 1));
+            
+            const material = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 }
+                },
+                vertexShader: `
+                    attribute float customSize;
+                    attribute vec3 customColor;
+                    varying vec3 vColor;
+                    uniform float time;
+                    
+                    void main() {
+                        vColor = customColor;
+                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                        float pulsate = sin(time * 2.0 + position.x * 0.1) * 0.5 + 1.0;
+                        gl_PointSize = customSize * pulsate * (300.0 / -mvPosition.z);
+                        gl_Position = projectionMatrix * mvPosition;
+                    }
+                `,
+                fragmentShader: `
+                    varying vec3 vColor;
+                    
+                    void main() {
+                        vec2 center = gl_PointCoord - vec2(0.5);
+                        float dist = length(center);
+                        if (dist > 0.5) discard;
+                        
+                        float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
+                        gl_FragColor = vec4(vColor, alpha);
+                    }
+                `,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+            magicParticles.push(particles);
+        }
+
+        function createEnergyWaves() {
+            for (let i = 0; i < 5; i++) {
+                const geometry = new THREE.RingGeometry(50, 55, 64);
+                const material = new THREE.MeshBasicMaterial({
+                    color: new THREE.Color().setHSL(0.8 + i * 0.05, 1, 0.5),
+                    transparent: true,
+                    opacity: 0,
+                    side: THREE.DoubleSide
+                });
+                
+                const ring = new THREE.Mesh(geometry, material);
+                ring.userData = {
+                    initialScale: 1,
+                    maxScale: 8,
+                    active: false,
+                    delay: i * 0.3
+                };
+                
+                scene.add(ring);
+                energyWaves.push(ring);
+            }
+        }
+
+        function createSparkles() {
+            for (let i = 0; i < 50; i++) {
+                const geometry = new THREE.SphereGeometry(1, 8, 8);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0
+                });
+                
+                const sparkle = new THREE.Mesh(geometry, material);
+                sparkle.userData = {
+                    active: false,
+                    lifetime: 0,
+                    maxLifetime: 1.0
+                };
+                
+                scene.add(sparkle);
+                sparkles.push(sparkle);
+            }
+        }
+
+        function triggerEnergyWave() {
+            energyWaves.forEach((wave, i) => {
+                setTimeout(() => {
+                    wave.userData.active = true;
+                    wave.scale.set(1, 1, 1);
+                    wave.material.opacity = 0.6;
+                    
+                    anime({
+                        targets: wave.scale,
+                        x: wave.userData.maxScale,
+                        y: wave.userData.maxScale,
+                        z: wave.userData.maxScale,
+                        duration: 2000,
+                        easing: 'easeOutQuad'
+                    });
+                    
+                    anime({
+                        targets: wave.material,
+                        opacity: 0,
+                        duration: 2000,
+                        easing: 'easeOutQuad',
+                        complete: () => {
+                            wave.userData.active = false;
+                        }
+                    });
+                }, wave.userData.delay * 1000);
+            });
+        }
+
+        function createSparkleExplosion() {
+            const availableSparkles = sparkles.filter(s => !s.userData.active);
+            const count = Math.min(15, availableSparkles.length);
+            
+            for (let i = 0; i < count; i++) {
+                const sparkle = availableSparkles[i];
+                sparkle.userData.active = true;
+                sparkle.userData.lifetime = 0;
+                
+                const angle = (i / count) * Math.PI * 2;
+                const speed = 50 + Math.random() * 100;
+                
+                sparkle.position.set(0, 0, 0);
+                sparkle.material.opacity = 1;
+                sparkle.scale.set(2, 2, 2);
+                
+                sparkle.userData.velocity = new THREE.Vector3(
+                    Math.cos(angle) * speed,
+                    Math.sin(angle) * speed,
+                    (Math.random() - 0.5) * speed
+                );
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('shape-btn').addEventListener('click', triggerMorph);
+            document.addEventListener('click', onCanvasClick);
+            window.addEventListener('resize', onWindowResize);
+
+            const colorOptions = document.querySelectorAll('.color-option');
+            colorOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    colorOptions.forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    CONFIG.colorScheme = option.dataset.scheme;
+                    updateColors();
+                });
+            });
+
+            const wordInput = document.getElementById('word-input');
+            wordInput.addEventListener('keypress', async (e) => {
+                if (e.key === 'Enter' && wordInput.value.trim()) {
+                    const customWord = wordInput.value.trim().toUpperCase();
+                    if (customWord.length > 0) {
+                        const customWordObj = { text: customWord, name: customWord };
+                        await generateWordShapes(customWordObj);
+                        currentWordIndex = WORDS.length;
+                        triggerMorph();
+                        wordInput.value = '';
+                    }
+                }
+            });
+        }
+
+        function generateWordPoints(text, particleCount) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = 1600;
+            canvas.height = 500;
+            
+            let fontSize = 120;
+            if (text.length > 10) fontSize = 90;
+            if (text.length > 15) fontSize = 70;
+            if (text.length > 20) fontSize = 60;
+            
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            
+            const points = [];
+            for (let y = 0; y < canvas.height; y += 2) {
+                for (let x = 0; x < canvas.width; x += 2) {
+                    const index = (y * canvas.width + x) * 4;
+                    const alpha = pixels[index + 3];
+                    
+                    if (alpha > 128) {
+                        points.push({
+                            x: (x - canvas.width / 2) * 0.4,
+                            y: -(y - canvas.height / 2) * 0.4,
+                            z: 0
+                        });
+                    }
+                }
+            }
+            
+            while (points.length < particleCount) {
+                const randomPoint = points[Math.floor(Math.random() * points.length)];
+                points.push({
+                    x: randomPoint.x + (Math.random() - 0.5) * 5,
+                    y: randomPoint.y + (Math.random() - 0.5) * 5,
+                    z: randomPoint.z + (Math.random() - 0.5) * 10
+                });
+            }
+            
+            if (points.length > particleCount) {
+                const step = points.length / particleCount;
+                const sampledPoints = [];
+                for (let i = 0; i < particleCount; i++) {
+                    sampledPoints.push(points[Math.floor(i * step)]);
+                }
+                return sampledPoints;
+            }
+            
+            return points.slice(0, particleCount);
+        }
+
+        async function generateWordShapes(customWord = null) {
+            console.log("Generating word shapes...");
+            targetPositions = [];
+
+            const wordsToGenerate = customWord ? [...WORDS, customWord] : WORDS;
+
+            for (let word of wordsToGenerate) {
+                const points = generateWordPoints(word.text, CONFIG.particleCount);
+                const positions = new Float32Array(CONFIG.particleCount * 3);
+                
+                for (let i = 0; i < CONFIG.particleCount; i++) {
+                    const point = points[i];
+                    positions[i * 3] = point.x;
+                    positions[i * 3 + 1] = point.y;
+                    positions[i * 3 + 2] = point.z;
+                }
+                
+                targetPositions.push(positions);
+            }
+
+            currentPositions = new Float32Array(targetPositions[0]);
+            sourcePositions = new Float32Array(targetPositions[0]);
+            swarmPositions = new Float32Array(CONFIG.particleCount * 3);
+            particleEffectStrengths = new Float32Array(CONFIG.particleCount).fill(0.0);
+
+            console.log("Word shapes generated.");
+        }
+
+        function createParticleSystem() {
+            console.log("Creating particle system...");
+            particlesGeometry = new THREE.BufferGeometry();
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(currentPositions, 3));
+
+            const colors = new Float32Array(CONFIG.particleCount * 3);
+            updateColorArray(colors, currentPositions);
+            particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            particlesGeometry.setAttribute('aEffectStrength', new THREE.BufferAttribute(particleEffectStrengths, 1));
+
+            const vertexShader = `
+                attribute float aEffectStrength;
+                varying vec3 vColor;
+                varying float vEffectStrength;
+
+                void main() {
+                    vColor = color;
+                    vEffectStrength = aEffectStrength;
+                    
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    float baseSize = ${CONFIG.particleSize.toFixed(1)};
+                    float heartbeat = 1.0 + sin(aEffectStrength * 15.0) * 0.3;
+                    float sizeMultiplier = heartbeat * (1.0 + vEffectStrength * 0.8);
+                    gl_PointSize = baseSize * sizeMultiplier * (300.0 / -mvPosition.z);
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `;
+
+            const fragmentShader = `
+                varying vec3 vColor;
+                varying float vEffectStrength;
+
+                void main() {
+                    vec2 center = gl_PointCoord - vec2(0.5);
+                    float dist = length(center);
+                    if (dist > 0.5) discard;
+                    
+                    float alpha = 1.0 - smoothstep(0.2, 0.5, dist);
+                    float glowIntensity = 1.5 + vEffectStrength * 1.5;
+                    vec3 finalColor = vColor * glowIntensity;
+                    
+                    gl_FragColor = vec4(finalColor, alpha);
+                }
+            `;
+
+            particlesMaterial = new THREE.ShaderMaterial({
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader,
+                transparent: true,
+                depthWrite: false,
+                blending: THREE.AdditiveBlending,
+                vertexColors: true
+            });
+
+            particleSystem = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particleSystem);
+        }
+
+        function updateColorArray(colors, positionsArray) {
+            const colorScheme = COLOR_SCHEMES[CONFIG.colorScheme];
+            const center = new THREE.Vector3(0, 0, 0);
+            const maxRadius = 300;
+            
+            for (let i = 0; i < CONFIG.particleCount; i++) {
+                const i3 = i * 3;
+                tempVec.fromArray(positionsArray, i3);
+                const dist = tempVec.distanceTo(center);
+                let hue;
+                
+                if (CONFIG.colorScheme === 'rainbow') {
+                    const normX = (tempVec.x / maxRadius + 1) / 2;
+                    const normY = (tempVec.y / maxRadius + 1) / 2;
+                    const normZ = (tempVec.z / maxRadius + 1) / 2;
+                    hue = (normX * 120 + normY * 120 + normZ * 120) % 360;
+                } else {
+                    hue = THREE.MathUtils.mapLinear(dist, 0, maxRadius, colorScheme.startHue, colorScheme.endHue);
+                }
+                
+                const noiseValue = (noise3D(tempVec.x * 0.02, tempVec.y * 0.02, tempVec.z * 0.02) + 1) * 0.5;
+                const saturation = THREE.MathUtils.clamp(colorScheme.saturation * (0.9 + noiseValue * 0.2), 0, 1);
+                const lightness = THREE.MathUtils.clamp(colorScheme.lightness * (0.85 + noiseValue * 0.3), 0.1, 0.9);
+                const color = new THREE.Color().setHSL(hue / 360, saturation, lightness);
+                color.toArray(colors, i3);
+            }
+        }
+
+        function updateColors() {
+            const colors = particlesGeometry.attributes.color.array;
+            updateColorArray(colors, particlesGeometry.attributes.position.array);
+            particlesGeometry.attributes.color.needsUpdate = true;
+        }
+
+        function triggerMorph() {
+            if (isMorphing) return;
+            isMorphing = true;
+            controls.autoRotate = false;
+            
+            triggerEnergyWave();
+            createSparkleExplosion();
+            
+            // TRACKING: Registrar mensaje visto
+            const wordName = WORDS[(currentWordIndex + 1) % WORDS.length].name;
+            if (typeof sessionData !== 'undefined' && !sessionData.messagesViewed.includes(wordName)) {
+                sessionData.messagesViewed.push(wordName);
+            }
+            
+            console.log("Morphing triggered...");
+            document.getElementById('info').innerText = `✨ Transformando con amor... ✨`;
+            
+            sourcePositions.set(currentPositions);
+            
+            const nextWordIndex = (currentWordIndex + 1) % targetPositions.length;
+            const nextTargetPositions = targetPositions[nextWordIndex];
+            
+            const centerOffsetAmount = 80;
+            for (let i = 0; i < CONFIG.particleCount; i++) {
+                const i3 = i * 3;
+                sourceVec.fromArray(sourcePositions, i3);
+                targetVec.fromArray(nextTargetPositions, i3);
+                swarmVec.lerpVectors(sourceVec, targetVec, 0.5);
+                
+                const offsetDir = tempVec.set(
+                    noise3D(i * 0.05, 10, 10),
+                    noise3D(20, i * 0.05, 20),
+                    noise3D(30, 30, i * 0.05)
+                ).normalize();
+                
+                const distFactor = sourceVec.distanceTo(targetVec) * 0.1 + centerOffsetAmount;
+                swarmVec.addScaledVector(offsetDir, distFactor * (0.5 + Math.random() * 0.8));
+                
+                swarmPositions[i3] = swarmVec.x;
+                swarmPositions[i3 + 1] = swarmVec.y;
+                swarmPositions[i3 + 2] = swarmVec.z;
+            }
+            
+            currentWordIndex = nextWordIndex;
+            morphState.progress = 0;
+            
+            if (morphTimeline) morphTimeline.pause();
+            
+            morphTimeline = anime({
+                targets: morphState,
+                progress: 1,
+                duration: CONFIG.morphDuration,
+                easing: 'cubicBezier(0.4, 0.0, 0.2, 1.0)',
+                complete: () => {
+                    console.log("Morphing complete.");
+                    const wordName = currentWordIndex < WORDS.length ? 
+                        WORDS[currentWordIndex].name : 
+                        targetPositions[currentWordIndex].name || 'PERSONALIZADO';
+                    document.getElementById('info').innerText = `💙 ${wordName} 💙 (Click para ver más)`;
+                    
+                    currentPositions.set(targetPositions[currentWordIndex]);
+                    particlesGeometry.attributes.position.needsUpdate = true;
+                    particleEffectStrengths.fill(0.0);
+                    particlesGeometry.attributes.aEffectStrength.needsUpdate = true;
+                    sourcePositions.set(targetPositions[currentWordIndex]);
+                    updateColors();
+                    isMorphing = false;
+                    controls.autoRotate = true;
+                }
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (!isInitialized) return;
+            
+            const elapsedTime = clock.getElapsedTime();
+            const deltaTime = clock.getDelta();
+            
+            controls.update();
+            
+            const positions = particlesGeometry.attributes.position.array;
+            const effectStrengths = particlesGeometry.attributes.aEffectStrength.array;
+
+            if (isMorphing) {
+                updateMorphAnimation(positions, effectStrengths, elapsedTime, deltaTime);
+            } else {
+                updateIdleAnimation(positions, effectStrengths, elapsedTime, deltaTime);
+            }
+            
+            auroraPlanes.forEach(aurora => {
+                aurora.material.uniforms.time.value = elapsedTime;
+            });
+            
+            hearts.forEach((heart, i) => {
+                heart.userData.angle += heart.userData.speed * deltaTime;
+                const floatY = Math.sin(elapsedTime * heart.userData.floatSpeed + heart.userData.floatOffset) * 40;
+                const pulse = 1 + Math.sin(elapsedTime * heart.userData.pulseSpeed + heart.userData.pulseOffset) * 0.15;
+                
+                heart.position.x = Math.cos(heart.userData.angle) * heart.userData.radius;
+                heart.position.y = heart.userData.baseHeight + floatY;
+                heart.position.z = Math.sin(heart.userData.angle) * heart.userData.radius;
+                
+                heart.rotation.y += deltaTime * 0.5;
+                heart.rotation.z = Math.sin(elapsedTime * 0.5 + i) * 0.2;
+                
+                const baseScale = heart.scale.x / pulse;
+                heart.scale.set(baseScale * pulse, baseScale * pulse, baseScale * pulse);
+            });
+            
+            magicParticles.forEach(particles => {
+                particles.material.uniforms.time.value = elapsedTime;
+                const positions = particles.geometry.attributes.position.array;
+                
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i] += Math.sin(elapsedTime + i) * 0.5;
+                    positions[i + 1] += Math.cos(elapsedTime * 0.5 + i) * 0.5;
+                    positions[i + 2] += Math.sin(elapsedTime * 0.3 + i) * 0.3;
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+                particles.rotation.y += deltaTime * 0.1;
+            });
+            
+            sparkles.forEach(sparkle => {
+                if (sparkle.userData.active) {
+                    sparkle.userData.lifetime += deltaTime;
+                    sparkle.position.add(sparkle.userData.velocity.clone().multiplyScalar(deltaTime));
+                    
+                    const lifeRatio = sparkle.userData.lifetime / sparkle.userData.maxLifetime;
+                    sparkle.material.opacity = 1 - lifeRatio;
+                    sparkle.scale.multiplyScalar(0.98);
+                    
+                    if (sparkle.userData.lifetime >= sparkle.userData.maxLifetime) {
+                        sparkle.userData.active = false;
+                        sparkle.material.opacity = 0;
+                    }
+                }
+            });
+            
+            particlesGeometry.attributes.position.needsUpdate = true;
+            if (isMorphing || particlesGeometry.attributes.aEffectStrength.needsUpdate) {
+                particlesGeometry.attributes.aEffectStrength.needsUpdate = true;
+            }
+            
+            composer.render(deltaTime);
+        }
+
+        function updateMorphAnimation(positions, effectStrengths, elapsedTime, deltaTime) {
+            const t = morphState.progress;
+            const targets = targetPositions[currentWordIndex];
+            const effectStrength = Math.sin(t * Math.PI);
+            const currentSwirl = effectStrength * CONFIG.swirlFactor * deltaTime * 50;
+            const currentNoise = effectStrength * CONFIG.noiseMaxStrength;
+
+            for (let i = 0; i < CONFIG.particleCount; i++) {
+                const i3 = i * 3;
+                sourceVec.fromArray(sourcePositions, i3);
+                swarmVec.fromArray(swarmPositions, i3);
+                targetVec.fromArray(targets, i3);
+
+                const t_inv = 1.0 - t;
+                const t_inv_sq = t_inv * t_inv;
+                const t_sq = t * t;
+                bezPos.copy(sourceVec).multiplyScalar(t_inv_sq);
+                bezPos.addScaledVector(swarmVec, 2.0 * t_inv * t);
+                bezPos.addScaledVector(targetVec, t_sq);
+
+                if (currentSwirl > 0.01) {
+                    tempVec.subVectors(bezPos, sourceVec);
+                    swirlAxis.set(
+                        noise3D(i * 0.02, elapsedTime * 0.1, 0),
+                        noise3D(0, i * 0.02, elapsedTime * 0.1 + 5),
+                        noise3D(elapsedTime * 0.1 + 10, 0, i * 0.02)
+                    ).normalize();
+                    tempVec.applyAxisAngle(swirlAxis, currentSwirl * (0.5 + Math.random() * 0.5));
+                    bezPos.copy(sourceVec).add(tempVec);
+                }
+
+                if (currentNoise > 0.01) {
+                    const noiseTime = elapsedTime * CONFIG.noiseTimeScale;
+                    noiseOffset.set(
+                        noise4D(bezPos.x * CONFIG.noiseFrequency, bezPos.y * CONFIG.noiseFrequency, bezPos.z * CONFIG.noiseFrequency, noiseTime),
+                        noise4D(bezPos.x * CONFIG.noiseFrequency + 100, bezPos.y * CONFIG.noiseFrequency + 100, bezPos.z * CONFIG.noiseFrequency + 100, noiseTime),
+                        noise4D(bezPos.x * CONFIG.noiseFrequency + 200, bezPos.y * CONFIG.noiseFrequency + 200, bezPos.z * CONFIG.noiseFrequency + 200, noiseTime)
+                    );
+                    bezPos.addScaledVector(noiseOffset, currentNoise);
+                }
+
+                positions[i3] = bezPos.x;
+                positions[i3 + 1] = bezPos.y;
+                positions[i3 + 2] = bezPos.z;
+
+                effectStrengths[i] = effectStrength;
+            }
+            particlesGeometry.attributes.aEffectStrength.needsUpdate = true;
+        }
+
+        function updateIdleAnimation(positions, effectStrengths, elapsedTime, deltaTime) {
+            const breathScale = 1.0 + Math.sin(elapsedTime * 0.5) * 0.005;
+            const timeScaled = elapsedTime * CONFIG.idleFlowSpeed;
+            const freq = 0.08;
+
+            let needsEffectStrengthReset = false;
+
+            for (let i = 0; i < CONFIG.particleCount; i++) {
+                const i3 = i * 3;
+                sourceVec.fromArray(sourcePositions, i3);
+                tempVec.copy(sourceVec).multiplyScalar(breathScale);
+                flowVec.set(
+                    noise4D(tempVec.x * freq, tempVec.y * freq, tempVec.z * freq, timeScaled),
+                    noise4D(tempVec.x * freq + 10, tempVec.y * freq + 10, tempVec.z * freq + 10, timeScaled),
+                    noise4D(tempVec.x * freq + 20, tempVec.y * freq + 20, tempVec.z * freq + 20, timeScaled)
+                );
+                tempVec.addScaledVector(flowVec, CONFIG.idleFlowStrength);
+                currentVec.fromArray(positions, i3);
+                currentVec.lerp(tempVec, 0.02);
+                positions[i3] = currentVec.x;
+                positions[i3 + 1] = currentVec.y;
+                positions[i3 + 2] = currentVec.z;
+
+                if (effectStrengths[i] !== 0.0) {
+                    effectStrengths[i] = 0.0;
+                    needsEffectStrengthReset = true;
+                }
+            }
+            if (needsEffectStrengthReset) {
+                particlesGeometry.attributes.aEffectStrength.needsUpdate = true;
+            }
+        }
+
+        function onCanvasClick(event) {
+            if (event.target.closest('#controls')) {
+                return;
+            }
+            triggerMorph();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        init();
+
+    </script>
+</body>
+</html>

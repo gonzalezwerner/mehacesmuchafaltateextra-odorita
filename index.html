@@ -283,13 +283,13 @@
             interactions: 0
         };
     
-        // Función para enviar notificación usando sendBeacon
-        function sendNotification(tipo) {
+        // Función para enviar notificación
+        async function sendNotification(tipo) {
             const now = new Date();
             const timeSpent = Math.round((now - sessionData.openTime) / 1000);
     
             const data = {
-                tipo,
+                tipo: tipo,
                 timestamp: now.toISOString(),
                 ubicacion: {
                     pais: sessionData.country,
@@ -312,11 +312,19 @@
                     : `⏱️ Página cerrada después de ${timeSpent} segundos`
             };
     
-            if (navigator.sendBeacon) {
-                navigator.sendBeacon(WEBHOOK_URL, JSON.stringify(data));
-                console.log('✅ Notificación enviada:', tipo);
-            } else {
-                console.warn('⚠️ sendBeacon no soportado, no se envía la notificación.');
+            try {
+                if (tipo === 'CIERRE' && navigator.sendBeacon) {
+                    navigator.sendBeacon(WEBHOOK_URL, JSON.stringify(data));
+                } else {
+                    const response = await fetch(WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    if (response.ok) console.log('✅ Notificación enviada:', tipo);
+                }
+            } catch (error) {
+                console.error('⚠️ Error al enviar notificación:', error);
             }
         }
     
@@ -333,15 +341,14 @@
             } catch (error) {
                 console.warn('No se pudo obtener ubicación:', error);
             } finally {
-                // Enviar notificación de apertura
-                sendNotification('APERTURA');
+                await sendNotification('APERTURA');
             }
         }
     
         // Contar clicks del usuario
         document.addEventListener('click', () => sessionData.interactions++);
     
-        // Enviar notificación de cierre al cerrar la página
+        // Enviar notificación de cierre
         window.addEventListener('unload', () => sendNotification('CIERRE'));
     
         // Iniciar tracking al cargar la página
